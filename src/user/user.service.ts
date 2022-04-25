@@ -39,6 +39,7 @@ export class UserService {
   async deleteUser(id) {
     return this.userModel.findByIdAndRemove(id);
   }
+
   async findOne(username: string): Promise<User | undefined> {
     return this.userModel.findOne({ username });
   }

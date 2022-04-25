@@ -8,6 +8,7 @@ import { BookModule } from './book/book.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { BorrowModule } from './borrow/borrow.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
     UserModule,
     BookModule,
     AuthModule,
+    BorrowModule,
   ],
   providers: [
     {

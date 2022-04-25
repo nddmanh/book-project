@@ -30,4 +30,8 @@ export class BookService {
   async deleteBook(id) {
     return this.bookModel.findByIdAndRemove(id);
   }
+
+  async findOne(id: string): Promise<Book | undefined> {
+    return this.bookModel.findById(id);
+  }
 }

@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './models/user.models';
 import { UserUpdateDto } from './dto/userUpdate.dto';
@@ -16,18 +8,6 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post('register')
-  @ApiOkResponse({ description: 'Register new user successfully' })
-  async createUser(@Body() userDto: User) {
-    return this.userService.createUser(userDto);
-  }
-
-  @Post('login')
-  @ApiOkResponse({ description: 'Insert new user successfully' })
-  async login(@Body() userDto: User) {
-    return this.userService.createUser(userDto);
-  }
 
   @Get()
   readUser() {

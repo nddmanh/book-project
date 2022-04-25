@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import * as argon2 from 'argon2';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,18 +16,33 @@ export class AuthService {
     password: string,
   ): Promise<any> {
     const user = await this.usersService.findOne(username);
-    if (user && user.password === password) {
+    if (!user) return null;
+    const isPasswordMatching = await argon2.verify(user.password, password);
+    if (isPasswordMatching) {
       const { password, ...result } = user;
       return result;
     }
     return null;
   }
 
-  async loginWithCredentials(user: LoginDto) {
-    const { username, password } = user;
-    const userRec = await this.usersService.findOne(username);
-
-    if (userRec && userRec.password === password) {
+  async login(user: LoginDto) {
+    try {
+      const { username, password } = user;
+      const userRec = await this.usersService.findOne(username);
+      if (!userRec) {
+        return {
+          message: 'Invalid username or password',
+        };
+      }
+      const isPasswordMatching = await argon2.verify(
+        userRec.password,
+        password,
+      );
+      if (!isPasswordMatching) {
+        return {
+          message: 'Invalid username or password',
+        };
+      }
       const payload = {
         username: userRec.username,
         role: userRec.role,
@@ -33,10 +50,8 @@ export class AuthService {
       return {
         access_token: this.jwtTokenService.sign(payload),
       };
+    } catch (error) {
+      throw new BadRequestException();
     }
-
-    return {
-      message: 'Invalid username or password',
-    };
   }
 }

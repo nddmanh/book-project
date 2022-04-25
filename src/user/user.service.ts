@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { User, UserDocument } from './models/user.models';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -9,9 +10,17 @@ export class UserService {
     @InjectModel('user') private readonly userModel: Model<UserDocument>,
   ) {}
 
-  async createUser(user: User): Promise<User> {
-    const newUser = new this.userModel(user);
-    return newUser.save();
+  async createUser(user: User) {
+    try {
+      const userRec = await this.findOne(user.username);
+      if (userRec) return { message: 'username is exist.' };
+      const hashPassword = await argon2.hash(user.password);
+      const newUser = new this.userModel(user);
+      newUser.password = hashPassword;
+      return newUser.save();
+    } catch (error) {
+      throw new BadRequestException();
+    }
   }
 
   async readUser() {

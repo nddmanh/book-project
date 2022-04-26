@@ -1,26 +1,19 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { BorrowService } from './borrow.service';
 import { Borrow } from './models/borrow.models';
 import { BorrowUpdateDto } from './dto/borrowUpdate.dto';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetCurrentUser } from '../auth/decorators/get-current-user.decorator';
 import { BorrowCreateDto } from './dto/borrowCreate.dto';
 
+@ApiBearerAuth()
 @ApiTags('borrow')
 @Controller('borrows')
 export class BorrowController {
   constructor(private readonly borrowService: BorrowService) {}
 
   @Post()
-  @ApiOkResponse({ description: 'Insert new borrow successfully' })
+  @ApiOkResponse({ description: 'borrow book successfully' })
   async borrowBook(
     @GetCurrentUser() currentUser,
     @Body() borrowCreateDto: BorrowCreateDto,

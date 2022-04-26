@@ -18,20 +18,20 @@ export class BorrowService {
     private bookService: BookService,
   ) {}
 
-  async borrowBook(
-    currentUser: User,
-    borrowCreateDto: BorrowCreateDto,
-  ): Promise<Borrow> {
+  async borrowBook(currentUser: User, borrowCreateDto: BorrowCreateDto) {
     try {
       const newBorrow = new this.borrowModel();
       const userRec = await this.userService.findOne(currentUser.username);
+      if (!userRec) throw new BadRequestException();
       const bookRec = await this.bookService.findOne(borrowCreateDto.book_id);
+      if (!bookRec) throw new BadRequestException();
+      const borrowRec = await this.borrowModel.find({ book: bookRec });
+      if (borrowRec) return 'This book have been borrowed.';
 
       newBorrow.user = userRec;
       newBorrow.book = bookRec;
       newBorrow.borrow_date = new Date();
       newBorrow.regis_return_date = new Date();
-
       return newBorrow.save();
     } catch (error) {
       throw new BadRequestException();
@@ -40,7 +40,6 @@ export class BorrowService {
 
   async readBorrow(currentUser: User) {
     const userRec = await this.userService.findOne(currentUser.username);
-
     return this.borrowModel
       .find({
         User: userRec,

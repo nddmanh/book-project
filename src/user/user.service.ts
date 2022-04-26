@@ -32,14 +32,6 @@ export class UserService {
       .catch((err) => console.log(err));
   }
 
-  async updateUser(id, data): Promise<User> {
-    return this.userModel.findByIdAndUpdate(id, data, { new: true });
-  }
-
-  async deleteUser(id) {
-    return this.userModel.findByIdAndRemove(id);
-  }
-
   async findOne(username: string): Promise<User | undefined> {
     return this.userModel.findOne({ username });
   }

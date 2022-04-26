@@ -1,14 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './decorators/public.auth';
 import { User } from '../user/models/user.models';
@@ -32,11 +24,5 @@ export class AuthController {
   @Post('register')
   async register(@Body() user: User) {
     return this.userService.createUser(user);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('user-info')
-  getUserInfo(@Request() req) {
-    return req.user;
   }
 }

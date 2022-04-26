@@ -1,9 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Put } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from './models/user.models';
-import { UserUpdateDto } from './dto/userUpdate.dto';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @ApiTags('user')
 @Controller('users')
 export class UserController {
@@ -12,19 +11,5 @@ export class UserController {
   @Get()
   readUser() {
     return this.userService.readUser();
-  }
-
-  @Put(':id')
-  @ApiOkResponse({ description: 'Update user successfully' })
-  async updateUser(
-    @Param('id') id: string,
-    @Body() updateData: UserUpdateDto,
-  ): Promise<User> {
-    return this.userService.updateUser(id, updateData);
-  }
-
-  @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
-    return this.userService.deleteUser(id);
   }
 }

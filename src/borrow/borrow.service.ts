@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Borrow, BorrowDocument } from './models/borrow.models';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,9 +7,12 @@ import { BorrowCreateDto } from './dto/borrowCreate.dto';
 import { UserService } from '../user/user.service';
 import { BookService } from '../book/book.service';
 import { BookDocument } from '../book/models/book.models';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class BorrowService {
+  private readonly logger = new Logger(BorrowService.name);
+
   constructor(
     @InjectModel('borrow') private readonly borrowModel: Model<BorrowDocument>,
     @InjectModel('user') private readonly userModel: Model<UserDocument>,
@@ -17,6 +20,28 @@ export class BorrowService {
     private userService: UserService,
     private bookService: BookService,
   ) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleCron() {
+    this.logger.debug(
+      'Called every day at midnight to check books need to return',
+    );
+    // Get all borrow rec
+    const borrowRecs = await this.getAllBorrow();
+
+    // Compare date and return borrow need return data
+    let bookNeedReturn = [];
+    const currentDate = new Date();
+    if (Array.isArray(borrowRecs)) {
+      bookNeedReturn = borrowRecs.filter(
+        (borrowRec) =>
+          this.calculateTime(currentDate, borrowRec.regis_return_date) < 1,
+      );
+    }
+
+    // Send to user: Fix me
+    console.log('Book need to return: ', bookNeedReturn);
+  }
 
   async borrowBook(currentUser: User, borrowCreateDto: BorrowCreateDto) {
     try {
@@ -30,8 +55,8 @@ export class BorrowService {
 
       newBorrow.user = userRec;
       newBorrow.book = bookRec;
-      newBorrow.borrow_date = new Date();
-      newBorrow.regis_return_date = new Date();
+      newBorrow.borrow_date = borrowCreateDto.borrow_date;
+      newBorrow.regis_return_date = borrowCreateDto.regis_return_date;
       return newBorrow.save();
     } catch (error) {
       throw new BadRequestException();
@@ -61,7 +86,30 @@ export class BorrowService {
       .catch((err) => console.log(err));
   }
 
+  async getAllBorrow() {
+    return this.borrowModel
+      .find({
+        return_date: null,
+      })
+      .populate({
+        path: 'user',
+        model: this.userModel,
+        select: 'username role',
+      })
+      .then((borrow) => {
+        return borrow;
+      })
+      .catch((err) => console.log(err));
+  }
+
   async returnBook(id, data): Promise<Borrow> {
     return this.borrowModel.findByIdAndUpdate(id, data, { new: true });
+  }
+
+  calculateTime(startDate: Date, endDate: Date): number {
+    const diffInMs =
+      new Date(endDate).valueOf() - new Date(startDate).valueOf();
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+    return diffInDays;
   }
 }

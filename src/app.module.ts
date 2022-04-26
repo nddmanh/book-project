@@ -9,11 +9,13 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { BorrowModule } from './borrow/borrow.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
     MongooseModule.forRoot(config().db_uri),
+    ScheduleModule.forRoot(),
     UserModule,
     BookModule,
     AuthModule,

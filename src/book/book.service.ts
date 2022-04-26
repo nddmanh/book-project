@@ -12,7 +12,7 @@ export class BookService {
 
   async createBook(book: Book): Promise<Book> {
     const newBook = new this.bookModel(book);
-    return newBook.save();
+    return (await newBook.save()).toObject();
   }
 
   async readBook(getBookQuery: GetBookQuery) {

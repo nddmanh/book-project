@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
 } from '@nestjs/common';
 import { BorrowService } from './borrow.service';
 import { Borrow } from './models/borrow.models';
@@ -29,21 +29,16 @@ export class BorrowController {
   }
 
   @Get()
-  readBorrow() {
-    return this.borrowService.readBorrow();
+  readBorrow(@GetCurrentUser() currentUser) {
+    return this.borrowService.readBorrow(currentUser);
   }
 
-  @Put(':id')
-  @ApiOkResponse({ description: 'Update borrow successfully' })
-  async updateBorrow(
+  @Patch(':id')
+  @ApiOkResponse({ description: 'Return book successfully' })
+  async returnBook(
     @Param('id') id: string,
     @Body() updateData: BorrowUpdateDto,
   ): Promise<Borrow> {
-    return this.borrowService.updateBorrow(id, updateData);
-  }
-
-  @Delete(':id')
-  async deleteBorrow(@Param('id') id: string) {
-    return this.borrowService.deleteBorrow(id);
+    return this.borrowService.returnBook(id, updateData);
   }
 }

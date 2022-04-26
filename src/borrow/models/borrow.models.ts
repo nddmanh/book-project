@@ -19,10 +19,10 @@ export class Borrow {
   borrow_date: Date;
 
   @Prop()
-  return_date: Date;
+  regis_return_date: Date;
 
-  @Prop({ default: false })
-  is_return: boolean;
+  @Prop({ default: null })
+  return_date: Date;
 }
 
 export const BorrowSchema = SchemaFactory.createForClass(Borrow);

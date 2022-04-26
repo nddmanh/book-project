@@ -10,9 +10,11 @@ import { BorrowSchema } from './models/borrow.models';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'borrow', schema: BorrowSchema }]),
-    MongooseModule.forFeature([{ name: 'user', schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: 'book', schema: BookSchema }]),
+    MongooseModule.forFeature([
+      { name: 'borrow', schema: BorrowSchema },
+      { name: 'book', schema: BookSchema },
+      { name: 'user', schema: UserSchema },
+    ]),
   ],
   controllers: [BorrowController],
   providers: [BorrowService, UserService, BookService],

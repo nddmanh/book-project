@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  dev:
+    container_name: book_project_api_dev
+    image: book_project-api-dev:1.0.0
+    build:
+      context: .
+      target: development
+      dockerfile: ./Dockerfile
+    command: npm run start:debug
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped

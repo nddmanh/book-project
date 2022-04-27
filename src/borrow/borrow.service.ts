@@ -8,7 +8,8 @@ import { UserService } from '../user/user.service';
 import { BookService } from '../book/book.service';
 import { BookDocument } from '../book/models/book.models';
 import { Cron, CronExpression } from '@nestjs/schedule';
-
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 @Injectable()
 export class BorrowService {
   private readonly logger = new Logger(BorrowService.name);
@@ -19,28 +20,37 @@ export class BorrowService {
     @InjectModel('book') private readonly bookModel: Model<BookDocument>,
     private userService: UserService,
     private bookService: BookService,
+    private httpService: HttpService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleCron() {
+    const URL_WEBHOOK =
+      'https://webhook.site/b334128a-571d-4068-a25a-b75cdd011902';
     this.logger.debug(
       'Called every day at midnight to check books need to return',
     );
-    // Get all borrow rec
+    // Get all borrow rec has book not return
     const borrowRecs = await this.getAllBorrow();
-
     // Compare date and return borrow need return data
-    let bookNeedReturn = [];
+    let booksNeedReturn = [];
     const currentDate = new Date();
     if (Array.isArray(borrowRecs)) {
-      bookNeedReturn = borrowRecs.filter(
+      booksNeedReturn = borrowRecs.filter(
         (borrowRec) =>
           this.calculateTime(currentDate, borrowRec.regis_return_date) < 1,
       );
     }
-
-    // Send to user: Fix me
-    console.log('Book need to return: ', bookNeedReturn);
+    // Send to webhook:
+    const params = JSON.stringify(booksNeedReturn);
+    await firstValueFrom(
+      this.httpService.post(URL_WEBHOOK, params, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    );
+    this.logger.debug('Send to webhook successfully');
   }
 
   async borrowBook(currentUser: User, borrowCreateDto: BorrowCreateDto) {

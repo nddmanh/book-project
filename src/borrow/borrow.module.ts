@@ -7,6 +7,7 @@ import { UserService } from '../user/user.service';
 import { BorrowController } from './borrow.controller';
 import { BorrowService } from './borrow.service';
 import { BorrowSchema } from './models/borrow.models';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -15,6 +16,12 @@ import { BorrowSchema } from './models/borrow.models';
       { name: 'book', schema: BookSchema },
       { name: 'user', schema: UserSchema },
     ]),
+    HttpModule.registerAsync({
+      useFactory: () => ({
+        timeout: 5000,
+        maxRedirects: 5,
+      }),
+    }),
   ],
   controllers: [BorrowController],
   providers: [BorrowService, UserService, BookService],
